@@ -4,11 +4,11 @@ import { RouterModule } from '@angular/router';
 import { LayoutComponent } from './layout/layout.component';
 import { HomeComponent } from './home/home.component';
 import { dashboardRoutes } from './dashboard.routes';
-
-
+import { AuthGuard } from '../guards/auth-guard.service';
 
 @NgModule({
   declarations: [LayoutComponent, HomeComponent],
+  providers: [AuthGuard],
   imports: [
     CommonModule,
     RouterModule.forChild(dashboardRoutes)
