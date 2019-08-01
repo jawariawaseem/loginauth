@@ -20,8 +20,11 @@ export class LoginComponent implements OnInit {
 	ngOnInit() {
 	}
 	login(theUser: User){
-		this.authService.login(theUser);
-		this._router.navigate(['./dashboard']);
+		this.authService.login(theUser).subscribe( data => {
+			console.log(data); // without this request is not sent
+			this._router.navigate(['./dashboard']);
+			localStorage.setItem('user', JSON.stringify(data));
+		});
 	}
 
 }

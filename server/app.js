@@ -5,6 +5,7 @@ const app = express();
 const mongoose = require('mongoose');
 const config = require('./config');
 const User = require('./models/User');
+const authenticate = require('./authenticate');
 
 // mongoose.connect('mongodb://localhost:27017/epicchat', {useNewUrlParser: true});
 
@@ -20,18 +21,18 @@ app.use(bodyParser.json());// paser all the requests that are going in and  out 
 app.use(express.static(path.join(__dirname,'../dist')));
 //events listeners
 
-app.post('register',(req,res) => {
+app.post('/register',(req,res) => {
 	const newUser = new User({
 		name: req.body.fullName,
 		email: req.body.email
 	});
-	newUser.password = newUser.genarateHash(req,body.password);
+	newUser.password = newUser.generateHash(req.body.password);
 	newUser.save().then(rec => {
 		res.status(201).json(rec);
 	});
 });
 
-app.post('login',(req,res) => {
+app.post('/login',(req,res) => {
 	User.findOne({email: req.body.email}).then(loginUser => {
 		if(!loginUser){
 			return res.status(401).json({message: 'This email does not exist!'});
@@ -39,11 +40,13 @@ app.post('login',(req,res) => {
 		if(!loginUser.validatePassword(req.body.password)){
 			return res.status(401).json({message: 'Invalid username or password!'});
 		}
-		res.status(200).json(loginUser);
+		const withToken = {email: loginUser.email, _id: loginUser._id};
+		withToken.token = loginUser.generateJWT();
+		res.status(200).json(withToken);
 	});
 });
 
-app.get('users',(req,res) => {
+app.get('/users',authenticate, (req,res) => {
 	User.find().then(rec => {
 		res.status(200).json(rec);
 	});
